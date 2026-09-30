@@ -5,6 +5,7 @@
 #include <cstring>
 
 #include "config.h"
+#include "services/settings_validation.h"
 
 namespace services::location {
 
@@ -16,32 +17,23 @@ constexpr char kKeyLon[] = "lon";
 
 double s_lat = config::kDefaultRadarLat;
 double s_lon = config::kDefaultRadarLon;
-
-bool parseCoord(const char* text, double* out) {
-  if (text == nullptr || text[0] == '\0') {
-    return false;
-  }
-  char* end = nullptr;
-  const double v = strtod(text, &end);
-  if (end == text || (end != nullptr && *end != '\0')) {
-    return false;
-  }
-  *out = v;
-  return true;
-}
+bool s_configured = false;
 
 bool validLatLon(double lat, double lon) {
   return lat >= -90.0 && lat <= 90.0 && lon >= -180.0 && lon <= 180.0;
 }
 
-void persist(double lat, double lon) {
+bool persist(double lat, double lon) {
   Preferences prefs;
-  prefs.begin(kPrefsNamespace, false);
-  prefs.putDouble(kKeyLat, lat);
-  prefs.putDouble(kKeyLon, lon);
+  if (!prefs.begin(kPrefsNamespace, false)) return false;
+  const bool ok = prefs.putDouble(kKeyLat, lat) == sizeof(double) &&
+                  prefs.putDouble(kKeyLon, lon) == sizeof(double);
   prefs.end();
+  if (!ok) return false;
   s_lat = lat;
   s_lon = lon;
+  s_configured = true;
+  return true;
 }
 
 }  // namespace
@@ -55,6 +47,7 @@ void init() {
     if (validLatLon(lat, lon)) {
       s_lat = lat;
       s_lon = lon;
+      s_configured = true;
     }
   }
   prefs.end();
@@ -63,19 +56,14 @@ void init() {
 double lat() { return s_lat; }
 
 double lon() { return s_lon; }
+bool configured() { return s_configured; }
 
 bool saveFromStrings(const char* lat_str, const char* lon_str) {
   double lat = 0.0;
   double lon = 0.0;
-  if (!parseCoord(lat_str, &lat) || !parseCoord(lon_str, &lon)) {
-    return false;
-  }
-  if (!validLatLon(lat, lon)) {
-    return false;
-  }
-  persist(lat, lon);
-  Serial.printf("Radar location saved: %.6f, %.6f\n", lat, lon);
-  return true;
+  if (!settings::parseCoordinates(lat_str, lon_str, lat, lon)) return false;
+  if (s_configured && lat == s_lat && lon == s_lon) return true;
+  return persist(lat, lon);
 }
 
 void clear() {
@@ -86,6 +74,7 @@ void clear() {
   prefs.end();
   s_lat = config::kDefaultRadarLat;
   s_lon = config::kDefaultRadarLon;
+  s_configured = false;
 }
 
 }  // namespace services::location

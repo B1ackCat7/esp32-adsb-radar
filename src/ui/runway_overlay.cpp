@@ -1,9 +1,9 @@
 #include "ui/runway_overlay.h"
 
-#include <lgfx/v1/lgfx_fonts.hpp>
-
+#include <algorithm>
 #include <cmath>
 #include <cstdlib>
+#include <lgfx/v1/lgfx_fonts.hpp>
 
 #include "data/large_airports.h"
 #include "hardware/display_font.h"
@@ -79,8 +79,7 @@ void offsetKmFromCenter(float lat, float lon, float* dx_km, float* dy_km,
       static_cast<float>(services::location::lat()) * kDegToRad;
   *dx_km = static_cast<float>(lon - services::location::lon()) * kKmPerDeg *
            cosf(center_lat_rad);
-  *dy_km =
-      static_cast<float>(lat - services::location::lat()) * kKmPerDeg;
+  *dy_km = static_cast<float>(lat - services::location::lat()) * kKmPerDeg;
   *dist_km = sqrtf((*dx_km) * (*dx_km) + (*dy_km) * (*dy_km));
 }
 
@@ -162,23 +161,30 @@ bool segmentIntersectsDisc(int x0, int y0, int x1, int y1) {
   return (t0 >= 0.0f && t0 <= 1.0f) || (t1 >= 0.0f && t1 <= 1.0f);
 }
 
-void drawBoldRunwayLabel(lgfx::LGFXBase& gfx, const char* ident, int mx, int my) {
+void drawBoldRunwayLabel(lgfx::LGFXBase& gfx, const char* ident, int mx,
+                         int my) {
   const int tw = gfx.textWidth(ident);
   const int th = gfx.fontHeight();
   constexpr int kPadX = 2;
   constexpr int kPadY = 1;
 
+  // Keep the entire label inside the circular viewport, not just its anchor.
+  constexpr int r = radar::kGridOuterRadius - 2;
+  my = std::max(120 - r + th + 2, std::min(my, 120 + r - 2));
+  const int dy = std::max(std::abs(my - 120), std::abs(my - th - 2 - 120));
+  const int half = int(sqrtf(float(r * r - dy * dy))) - tw / 2 - kPadX;
+  if (half < 0) return;
+  mx = std::max(120 - half, std::min(mx, 120 + half));
   gfx.setTextDatum(textdatum_t::bottom_center);
   const int left = mx - tw / 2 - kPadX;
   const int top = my - th - kPadY;
   gfx.fillRect(left, top, tw + kPadX * 2, th + kPadY, radar::kColorBackground);
   gfx.setTextColor(radar::kColorRunwayLabel, radar::kColorBackground);
-  gfx.drawString(ident, mx - 1, my);
-  gfx.drawString(ident, mx + 1, my);
   gfx.drawString(ident, mx, my);
 }
 
-bool drawRunwayLine(lgfx::LGFXBase& gfx, const data::large_airports::Runway& rw) {
+bool drawRunwayLine(lgfx::LGFXBase& gfx,
+                    const data::large_airports::Runway& rw) {
   const float le_lat = e7ToDeg(rw.le_lat_e7);
   const float le_lon = e7ToDeg(rw.le_lon_e7);
   const float he_lat = e7ToDeg(rw.he_lat_e7);
