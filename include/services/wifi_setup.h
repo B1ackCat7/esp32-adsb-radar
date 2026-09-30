@@ -16,3 +16,5 @@ void bootButtonInit();
 bool bootButtonConsumeTap();
 /** Call each loop iteration; triggers WiFi reset on long hold. */
 void bootButtonPollLongPress();
+
+bool bootButtonConsumeRelease(unsigned long* at);

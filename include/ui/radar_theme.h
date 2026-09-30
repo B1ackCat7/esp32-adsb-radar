@@ -12,9 +12,9 @@ constexpr int kCenterY = kSize / 2;
 constexpr int kGridOuterRadius = 107;
 
 /** N: offset from top edge (top_center, negative = up). */
-constexpr int kCardinalNorthOffsetY = -1;
+constexpr int kCardinalNorthOffsetY = 4;
 /** S: offset from bottom edge (bottom_center, positive = down). */
-constexpr int kCardinalSouthOffsetY = 3;
+constexpr int kCardinalSouthOffsetY = -4;
 
 /** Gap between scale label right edge and outer ring on the east spoke (px). */
 constexpr int kScaleGapFromOuterRing = 6;
@@ -26,8 +26,9 @@ constexpr int kScaleBelowCardinalPx = 3;
 
 constexpr int kRingCount = 4;
 
-/** Shared grid stroke: drawWideLine half-width (~2 px total); rings use the same px count. */
-constexpr float kGridStrokeHalfWidth = 1.0f;
+/** Shared grid stroke: drawWideLine half-width (~2 px total); rings use the
+ * same px count. */
+constexpr float kGridStrokeHalfWidth = 0.5f;
 
 constexpr int kCenterDotRadius = 2;
 
@@ -48,7 +49,7 @@ constexpr float kAircraftTrackLineHalfWidth = 1.0f;
 
 constexpr float kRunwayLineWidthPx = 2.0f;
 constexpr float kRunwayLineHalfWidth = kRunwayLineWidthPx * 0.5f;
-constexpr int kRunwayLabelHeightPx = kCardinalLabelHeightPx;
+constexpr int kRunwayLabelHeightPx = 11;
 constexpr int kRunwayLabelGapPx = 3;
 /** Gap from triangle edge to tag block (px). */
 constexpr int kAircraftLabelGapPx = 1;
@@ -56,39 +57,15 @@ constexpr int kAircraftLabelGapPx = 1;
 constexpr int kAircraftInsideRingInsetPx =
     kAircraftNoseLenPx + kAircraftTailHalfPx + 1;
 
-/** Beyond-ring traffic: bearing cues on screen rim (correct direction, fixed radius). */
+/** Beyond-ring traffic: bearing cues on screen rim (correct direction, fixed
+ * radius). */
 constexpr int kBeyondRingDotRadiusPx = 4;
 constexpr int kBeyondRingScreenMarginPx = 2;
-/** Target cap height (px) for aircraft tags (bold, slightly above scale label). */
+/** Target cap height (px) for aircraft tags (bold, slightly above scale label).
+ */
 constexpr int kAircraftTagLabelHeightPx = 13;
 
-/** RGB565 palette targets (applied in initPalette). */
-constexpr uint8_t kBgR = 4;
-constexpr uint8_t kBgG = 10;
-constexpr uint8_t kBgB = 28;
-constexpr uint8_t kGridR = 16;
-constexpr uint8_t kGridG = 100;
-constexpr uint8_t kGridB = 32;
-constexpr uint8_t kAircraftR = 255;
-constexpr uint8_t kAircraftG = 0;
-constexpr uint8_t kAircraftB = 0;
-constexpr uint8_t kTrackR = 255;
-constexpr uint8_t kTrackG = 0;
-constexpr uint8_t kTrackB = 255;
-constexpr uint8_t kTagTypeR = 255;
-constexpr uint8_t kTagTypeG = 200;
-constexpr uint8_t kTagTypeB = 0;
-constexpr uint8_t kTagAltR = 90;
-constexpr uint8_t kTagAltG = 200;
-constexpr uint8_t kTagAltB = 255;
-constexpr uint8_t kRunwayR = 56;
-constexpr uint8_t kRunwayG = 150;
-constexpr uint8_t kRunwayB = 170;
-/** Lighter teal for ICAO labels (vs runway lines). */
-constexpr uint8_t kRunwayLabelR = 110;
-constexpr uint8_t kRunwayLabelG = 210;
-constexpr uint8_t kRunwayLabelB = 230;
-
+// Shared palette is defined in ui/display_theme.h.
 extern uint16_t kColorBackground;
 extern uint16_t kColorGrid;
 extern uint16_t kColorLabel;

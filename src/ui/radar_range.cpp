@@ -12,24 +12,15 @@ namespace ui::radar {
 namespace {
 
 constexpr char kPrefsNamespace[] = "planeradar";
-constexpr char kPrefsRangeKey[] = "rangeIdx";
 constexpr char kPrefsMilesKey[] = "useMiles";
 constexpr char kPrefsRunwaysKey[] = "showRwys";
-constexpr uint8_t kDefaultRangeIndex = 1;  // 10 km ring
+constexpr uint8_t kDefaultRangeIndex = 0;  // 25 km page
 constexpr float kKmPerMile = 1.609344f;
 
 Preferences s_prefs;
 uint8_t s_range_index = kDefaultRangeIndex;
 bool s_use_miles = false;
 bool s_show_runways = true;
-
-void saveRangeIndex() {
-  if (!s_prefs.begin(kPrefsNamespace, false)) {
-    return;
-  }
-  s_prefs.putUChar(kPrefsRangeKey, s_range_index);
-  s_prefs.end();
-}
 
 void saveUseMiles() {
   if (!s_prefs.begin(kPrefsNamespace, false)) {
@@ -65,17 +56,13 @@ void rangeInit() {
   if (!s_prefs.begin(kPrefsNamespace, true)) {
     return;
   }
-  const uint8_t saved = s_prefs.getUChar(kPrefsRangeKey, kDefaultRangeIndex);
-  s_range_index =
-      (saved < kRangePresetCount) ? saved : kDefaultRangeIndex;
   s_use_miles = s_prefs.getBool(kPrefsMilesKey, false);
   s_show_runways = s_prefs.getBool(kPrefsRunwaysKey, true);
   s_prefs.end();
 }
 
-void rangeNext() {
-  s_range_index = static_cast<uint8_t>((s_range_index + 1) % kRangePresetCount);
-  saveRangeIndex();
+void rangeSelect(uint8_t index) {
+  if (index < kRangePresetCount) s_range_index = index;
 }
 
 const RangePreset& rangeCurrent() { return kRangePresets[s_range_index]; }
@@ -87,6 +74,11 @@ float fetchRadiusKm() {
   const float screen_r_px =
       static_cast<float>(kCenterX - kBeyondRingScreenMarginPx);
   return outer_km * (screen_r_px / static_cast<float>(kGridOuterRadius));
+}
+
+float collectionRadiusKm() {
+  return kRangePresets[kRangePresetCount - 1].outer_km *
+         float(kCenterX - kBeyondRingScreenMarginPx) / kGridOuterRadius;
 }
 
 bool useMiles() { return s_use_miles; }

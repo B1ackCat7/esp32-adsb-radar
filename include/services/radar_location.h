@@ -5,9 +5,10 @@ namespace services::location {
 /** Load saved lat/lon from NVS, or use config defaults. Call once before WiFi setup. */
 void init();
 
-/** Factory defaults when nothing is stored (also used for portal field prefill). */
+/** Saved coordinates, or neutral internal values when unconfigured. */
 double lat();
 double lon();
+bool configured();
 
 /** Parse portal strings, validate, persist to NVS, update runtime values. */
 bool saveFromStrings(const char* lat_str, const char* lon_str);

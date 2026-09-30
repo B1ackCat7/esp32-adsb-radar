@@ -5,6 +5,7 @@
 #include <driver/gpio.h>
 
 namespace config {
+constexpr char kFirmwareVersion[] = "0.3.0-beta.1";
 
 // --- Wi-Fi portal ---
 constexpr char kPortalApName[] = "PlaneRadar-Setup";
@@ -40,16 +41,16 @@ constexpr int kDisplayWidth = 240;
 constexpr int kDisplayHeight = 240;
 
 constexpr uint32_t kDisplaySpiWriteHz = 40000000;
-// GC9A01 modules often need invert + BGR for correct black/green output
+// Inversion and channel order are independent panel settings.
 constexpr bool kDisplayInvert = true;
-constexpr bool kDisplayRgbOrder = true;
+// Default for the documented panel profile; verify channel order on your panel.
+constexpr bool kDisplayRgbOrder = false;
 
-// --- Radar center defaults (overridden via WiFi setup portal) ---
-constexpr double kDefaultRadarLat = 52.3676;
-constexpr double kDefaultRadarLon = 4.9041;
+// Neutral internal values only: first-run center fields are blank until saved.
+constexpr double kDefaultRadarLat = 0.0;
+constexpr double kDefaultRadarLon = 0.0;
 
-/** Poll adsb.fi (API public limit: 1 req/s). */
-constexpr unsigned long kAdsbFetchIntervalMs = 3000;
+// Polling cadence is centralized in services/poll_schedule.h.
 /** Legacy scale unused — fetch uses radar::fetchRadiusKm() to screen edge. */
 constexpr float kAdsbFetchRadiusScale = 1.0f;
 /** false = hide aircraft with alt_baro "ground"; true = show them too. */

@@ -1,6 +1,9 @@
 #pragma once
+#include <LovyanGFX.hpp>
 
 namespace ui {
+lgfx::LovyanGFX& sharedDisplayFrame();
+void pushSharedDisplayFrame();
 
 /** Draw the static sonar/radar grid (black disc, green overlay, labels). */
 void radarDisplayDraw();
