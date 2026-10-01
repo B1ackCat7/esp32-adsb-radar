@@ -2,9 +2,9 @@
 
 A local ADS-B radar and station monitor for an **ESP32-C3 Super Mini with a 240×240 GC9A01 round display**. Connect it to your own ADSB.im/readsb receiver, choose your radar center in the browser, and watch nearby aircraft over an offline world base map.
 
-Derived from **[MatixYo/ESP32-Plane-Radar v1.1.4](https://github.com/MatixYo/ESP32-Plane-Radar/tree/v1.1.4)**. Original radar graphics, Wi-Fi setup, wiring and runway support are credited to the upstream project. This fork adds local receiver integration, a Station page, configurable connection settings, four-page rotation, bounded aircraft retention and world-map generation. The upstream MIT license is preserved in [LICENSE](LICENSE).
+Derived from **[MatixYo/ESP32-Plane-Radar v1.1.4](https://github.com/MatixYo/ESP32-Plane-Radar/tree/v1.1.4)**. Original radar graphics, Wi-Fi setup, wiring and runway support are credited to the upstream project. This fork adds local receiver integration, a Station page, configurable connection settings, four-page rotation, bounded aircraft retention and world-map generation. Upstream `main` through `139a3ac7d173d0f1a03ac66d121e2dc8aba35718` is integrated; see the [compatibility decisions](docs/UPSTREAM_SYNC.md). The upstream MIT license is preserved in [LICENSE](LICENSE).
 
-**First public beta: v0.3.0-beta.1.** This binary targets the hardware and wiring below. Fresh-board onboarding, physical panel/button acceptance and extended stability testing remain open; see [validation](docs/VALIDATION.md).
+**Public beta: v0.3.0-beta.2.** This binary targets the hardware and wiring below. Fresh-board onboarding, physical panel/button acceptance and extended stability testing remain open; see [validation](docs/VALIDATION.md).
 
 ## Display and controls
 
@@ -21,8 +21,8 @@ Download the app image, merged image and checksums from [Releases](https://githu
 
 | Installation | Image | Flash offset |
 | --- | --- | --- |
-| Fresh supported board | `esp32-adsb-radar-v0.3.0-beta.1-merged.bin` | `0x0` |
-| Compatible existing partition layout | `esp32-adsb-radar-v0.3.0-beta.1-app.bin` | `0x10000` |
+| Fresh supported board | `esp32-adsb-radar-v0.3.0-beta.2-merged.bin` | `0x0` |
+| Compatible existing partition layout | `esp32-adsb-radar-v0.3.0-beta.2-app.bin` | `0x10000` |
 
 Verify the SHA-256 checksum and board type. Back up your complete flash before updating an existing device. An app-only update preserves settings when the existing partition layout matches [plane_radar.csv](partitions/plane_radar.csv). A merged write can overwrite settings; use it for fresh installation or deliberate recovery. Do not distribute a device flash dump: it can contain Wi-Fi credentials and saved settings.
 
@@ -31,9 +31,9 @@ With Python and esptool installed, replace `<PORT>` with your board's port:
 ```sh
 python -m esptool --chip esp32c3 --port <PORT> read-flash 0 0x400000 private-backup.bin
 # Fresh install:
-python -m esptool --chip esp32c3 --port <PORT> write-flash 0x0 esp32-adsb-radar-v0.3.0-beta.1-merged.bin
+python -m esptool --chip esp32c3 --port <PORT> write-flash 0x0 esp32-adsb-radar-v0.3.0-beta.2-merged.bin
 # Compatible update instead:
-python -m esptool --chip esp32c3 --port <PORT> write-flash 0x10000 esp32-adsb-radar-v0.3.0-beta.1-app.bin
+python -m esptool --chip esp32c3 --port <PORT> write-flash 0x10000 esp32-adsb-radar-v0.3.0-beta.2-app.bin
 ```
 
 ## Configure your station
@@ -91,7 +91,7 @@ Build outputs are under `.pio/build/supermini/`. Release binaries are freshly co
 
 ## Credits and licenses
 
-- Firmware foundation: [MatixYo/ESP32-Plane-Radar](https://github.com/MatixYo/ESP32-Plane-Radar), MIT. Baseline commit `9d857787ecf067ad68924b2600c63f19ef0fcba7` (v1.1.4).
+- Firmware foundation: [MatixYo/ESP32-Plane-Radar](https://github.com/MatixYo/ESP32-Plane-Radar), MIT. Baseline commit `9d857787ecf067ad68924b2600c63f19ef0fcba7` (v1.1.4); subsequently synchronized through `139a3ac7d173d0f1a03ac66d121e2dc8aba35718`.
 - Map: [Natural Earth](https://www.naturalearthdata.com/), public domain.
 - Airports/runways: [OurAirports](https://ourairports.com/data/), public domain.
 - Bundled Noto Sans font: SIL Open Font License 1.1; [license and provenance](THIRD_PARTY_NOTICES.md).

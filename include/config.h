@@ -5,7 +5,7 @@
 #include <driver/gpio.h>
 
 namespace config {
-constexpr char kFirmwareVersion[] = "0.3.0-beta.1";
+constexpr char kFirmwareVersion[] = "0.3.0-beta.2";
 
 // --- Wi-Fi portal ---
 constexpr char kPortalApName[] = "PlaneRadar-Setup";
