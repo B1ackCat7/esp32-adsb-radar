@@ -1,4 +1,4 @@
-/** Local receiver extension of MatixYo Plane Radar v1.1.4. */
+/** Local receiver extension of MatixYo Plane Radar. */
 #include <Arduino.h>
 #include <WiFi.h>
 

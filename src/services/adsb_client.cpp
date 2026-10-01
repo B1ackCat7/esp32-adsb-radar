@@ -10,6 +10,7 @@
 
 #include "config.h"
 #include "services/aircraft_buffer.h"
+#include "services/http_body_framing.h"
 #include "services/radar_location.h"
 #include "services/station_settings.h"
 #include "services/station_status.h"
@@ -24,7 +25,7 @@ double s_counter_stamp = 0;
 double s_counter = 0;
 constexpr int kConnectTimeoutMs = 1200;  // Short LAN connect timeout
 constexpr int kConnectAttempts =
-    1;  // a stalled TLS connect blocks the UI; retry next poll instead
+    1;  // retry a stalled LAN connection on the next scheduled poll
 constexpr unsigned long kRequestTimeoutMs = 1500;
 
 Aircraft s_aircraft[kMaxAircraft];
@@ -151,7 +152,11 @@ bool httpGetJson(const String& url, const char* tag, JsonDocument& doc,
     return false;
   }
 
-  http.useHTTP10(true);
+  // Upstream HTTP/1.1 framing supports receivers/proxies that chunk JSON.
+  static const char* wantedHeaders[] = {"Transfer-Encoding", "Content-Encoding"};
+  http.collectHeaders(wantedHeaders, 2);
+  http.useHTTP10(false);
+  http.setReuse(false);
   http.addHeader("Accept-Encoding", "identity");
   http.setTimeout(kRequestTimeoutMs);
   http.setConnectTimeout(kConnectTimeoutMs);
@@ -171,7 +176,14 @@ bool httpGetJson(const String& url, const char* tag, JsonDocument& doc,
     return false;
   }
 
-  if (http.getSize() > 200000) {
+  const String transferEncoding = http.header("Transfer-Encoding");
+  const String contentEncoding = http.header("Content-Encoding");
+  if ((!transferEncoding.isEmpty() &&
+       !transferEncoding.equalsIgnoreCase("chunked") &&
+       !transferEncoding.equalsIgnoreCase("identity")) ||
+      (!contentEncoding.isEmpty() &&
+       !contentEncoding.equalsIgnoreCase("identity")) ||
+      http.getSize() > 200000) {
     http.end();
     return false;
   }
@@ -181,14 +193,19 @@ bool httpGetJson(const String& url, const char* tag, JsonDocument& doc,
     WiFiClient& client;
     uint32_t started = millis(), lastByteAt = started;
     uint32_t bytes = 0;
+    uint32_t generation;
     uint8_t buffer[1024];
     size_t pos = 0, size = 0;
     const char* stop = "eof";
-    explicit BoundedReader(WiFiClient& c) : client(c) {}
+    BoundedReader(WiFiClient& c, uint32_t g) : client(c), generation(g) {}
     int read() {
       if (pos < size) return buffer[pos++];
       while (uint32_t(millis() - started) < 6000) {
         pollNetwork();
+        if (generation != s_configuration_generation) {
+          stop = "configuration changed";
+          return -1;
+        }
         if (bytes >= 200000) {
           stop = "size limit";
           return -1;
@@ -225,16 +242,25 @@ bool httpGetJson(const String& url, const char* tag, JsonDocument& doc,
       }
       return n;
     }
-  } reader(client);
+  } reader(client, generation);
+  services::http::BodyFramer<BoundedReader> body(
+      reader, transferEncoding.equalsIgnoreCase("chunked")
+                  ? services::http::BodyFraming::kChunked
+                  : services::http::BodyFraming::kIdentity,
+      http.getSize());
   const DeserializationError err =
-      deserializeJson(doc, reader, DeserializationOption::Filter(filter));
+      deserializeJson(doc, body, DeserializationOption::Filter(filter));
+  // A valid closing JSON brace does not prove the HTTP body arrived intact.
+  // Drain/check framing within the same time/byte bounds before publishing.
+  if (!err) body.drain();
   http.end();
   // Portal saves can happen cooperatively during this read. Never publish
   // a response from the previous receiver/center after a configuration change.
   if (generation != s_configuration_generation) { doc.clear(); return false; }
-  if (err) {
-    Serial.printf("%s: JSON %s; %s bytes=%u elapsed_ms=%lu rssi=%d\n", tag,
-                  err.c_str(), reader.stop, reader.bytes,
+  if (err || body.framingError() || body.truncated() ||
+      strcmp(reader.stop, "eof") != 0) {
+    Serial.printf("%s: JSON %s; %s framing=%d truncated=%d bytes=%u elapsed_ms=%lu rssi=%d\n", tag,
+                  err.c_str(), reader.stop, body.framingError(), body.truncated(), reader.bytes,
                   (unsigned long)(millis() - reader.started), WiFi.RSSI());
     return false;
   }
