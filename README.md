@@ -6,6 +6,14 @@ Derived from **[MatixYo/ESP32-Plane-Radar v1.1.4](https://github.com/MatixYo/ESP
 
 **Public beta: v0.3.0-beta.2.** This binary targets the hardware and wiring below. Fresh-board onboarding, physical panel/button acceptance and extended stability testing remain open; see [validation](docs/VALIDATION.md).
 
+## Page previews
+
+<img src="docs/images/pages-overview.png" alt="Four software-rendered example pages: 25 km radar with aircraft labels, 50 km and 100 km radar with symbols, and an online Station page showing messages per second, tracked aircraft and CPU temperature" width="640">
+
+These previews run the firmware's drawing code with **synthetic aircraft and station data** over a public Sydney city-center example. They show the logical RGB framebuffer, rather than photographs of a physical display; panel colors can vary. The map changes with your saved location.
+
+Open an individual page at its native 240×240 resolution: [25 km Radar](docs/images/radar-25km.png) · [50 km Radar](docs/images/radar-50km.png) · [100 km Radar](docs/images/radar-100km.png) · [Station](docs/images/station.png).
+
 ## Display and controls
 
 - Pages rotate **25 km Radar → 50 km Radar → 100 km Radar → Station**, every **25 seconds**. Startup is 25 km. Aircraft text is shown only at 25 km.
