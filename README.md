@@ -4,7 +4,7 @@ A local ADS-B radar and station monitor for an **ESP32-C3 Super Mini with a 240Ã
 
 Derived from **[MatixYo/ESP32-Plane-Radar v1.1.4](https://github.com/MatixYo/ESP32-Plane-Radar/tree/v1.1.4)**. Original radar graphics, Wi-Fi setup, wiring and runway support are credited to the upstream project. This fork adds local receiver integration, a Station page, configurable connection settings, four-page rotation, bounded aircraft retention and world-map generation. Upstream `main` through `139a3ac7d173d0f1a03ac66d121e2dc8aba35718` is integrated; see the [compatibility decisions](docs/UPSTREAM_SYNC.md). The upstream MIT license is preserved in [LICENSE](LICENSE).
 
-**Public beta: v0.3.0-beta.2.** This binary targets the hardware and wiring below. Fresh-board onboarding, physical panel/button acceptance and extended stability testing remain open; see [validation](docs/VALIDATION.md).
+**First stable release: v1.0.0.** This release targets the hardware and wiring below. See [validation and known limitations](docs/VALIDATION.md) for the checks performed and remaining hardware coverage.
 
 ## Page previews
 
@@ -29,8 +29,8 @@ Download the app image, merged image and checksums from [Releases](https://githu
 
 | Installation | Image | Flash offset |
 | --- | --- | --- |
-| Fresh supported board | `esp32-adsb-radar-v0.3.0-beta.2-merged.bin` | `0x0` |
-| Compatible existing partition layout | `esp32-adsb-radar-v0.3.0-beta.2-app.bin` | `0x10000` |
+| Fresh supported board | `esp32-adsb-radar-v1.0.0-merged.bin` | `0x0` |
+| Compatible existing partition layout | `esp32-adsb-radar-v1.0.0-app.bin` | `0x10000` |
 
 Verify the SHA-256 checksum and board type. Back up your complete flash before updating an existing device. An app-only update preserves settings when the existing partition layout matches [plane_radar.csv](partitions/plane_radar.csv). A merged write can overwrite settings; use it for fresh installation or deliberate recovery. Do not distribute a device flash dump: it can contain Wi-Fi credentials and saved settings.
 
@@ -39,10 +39,12 @@ With Python and esptool installed, replace `<PORT>` with your board's port:
 ```sh
 python -m esptool --chip esp32c3 --port <PORT> read-flash 0 0x400000 private-backup.bin
 # Fresh install:
-python -m esptool --chip esp32c3 --port <PORT> write-flash 0x0 esp32-adsb-radar-v0.3.0-beta.2-merged.bin
+python -m esptool --chip esp32c3 --port <PORT> write-flash 0x0 esp32-adsb-radar-v1.0.0-merged.bin
 # Compatible update instead:
-python -m esptool --chip esp32c3 --port <PORT> write-flash 0x10000 esp32-adsb-radar-v0.3.0-beta.2-app.bin
+python -m esptool --chip esp32c3 --port <PORT> write-flash 0x10000 esp32-adsb-radar-v1.0.0-app.bin
 ```
+
+Firmware updates use USB. The current single-app partition layout does not support browser/OTA updates.
 
 ## Configure your station
 
@@ -96,6 +98,10 @@ python3 scripts/run_checks.py
 ```
 
 Build outputs are under `.pio/build/supermini/`. Release binaries are freshly compiled from source, with project/build-cache paths normalized; they are not device backups. [Development notes](docs/DEVELOPMENT.md) describe architecture, diagnostics and the branch layout. [Privacy notes](docs/PRIVACY.md) describe stored settings and publication boundaries.
+
+## Bug reports and improvements
+
+Report problems and suggest improvements in [Issues](https://github.com/B1ackCat7/esp32-adsb-radar/issues). Include the firmware version, board/display wiring, receiver software, steps to reproduce and relevant error messages. Remove Wi-Fi credentials, precise coordinates and other private settings from logs or screenshots before sharing.
 
 ## Credits and licenses
 

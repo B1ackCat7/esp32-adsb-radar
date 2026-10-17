@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
   v.host = "192.168.1.100"; v.dataPort = "8080"; v.webPort = "80";
   v.lat = "0.000000"; v.lon = "0.000000";
   v.csrf = "preview-token"; v.revision = "1"; v.ip = "192.168.1.101";
-  v.firmware = "0.3.0-beta.1";
+  v.firmware = "1.0.0";
   auto html = ui::settingsPage::render(v);
   assert(html.find("{{") == std::string::npos);
   assert(html.find("name=\"station_host\" value=\"192.168.1.100\"") != std::string::npos);
